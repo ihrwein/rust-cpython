@@ -59,12 +59,13 @@ macro_rules! py_method_wrap {
 /// Creates a Python instance method descriptor that invokes a Rust function.
 
 /// There are two forms of this macro:
-/// 1) py_method!(f)
+///
+/// 1. py_method!(f)
 ///     `f` is the name of a rust function with the signature
 ///     `fn(Python, &SelfType, &PyTuple, Option<&PyDict>) -> PyResult<R>`
 ///      for some `R` that implements `ToPyObject`.
 ///
-/// 2) py_method!(f(parameter_list))
+/// 2. py_method!(f(parameter_list))
 ///     This form automatically converts the arguments into
 ///     the Rust types specified in the parameter list,
 ///     and then calls `f(Python, &SelfType, Parameters)`.
