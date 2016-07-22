@@ -43,7 +43,7 @@ Defines a new exception type.
 #[macro_use]
 extern crate cpython;
 
-use cpython::{Python, PyDict};
+use cpython::{ObjectProtocol, PyDict, NoArgs, Python};
 
 py_exception!(mymodule, CustomError);
 
@@ -52,6 +52,11 @@ fn main() {
     let py = gil.python();
     let ctx = PyDict::new(py);
 
+    let e = CustomError::new(py, NoArgs);
+    let s_ = e.ptype.str(py).unwrap();
+    let s = s_.to_string(py).unwrap();
+
+    assert_eq!(s, "<class 'mymodule.CustomError'>");
     ctx.set_item(py, "CustomError", py.get_type::<CustomError>()).unwrap();
 
     py.run("assert str(CustomError) == \"<class 'mymodule.CustomError'>\"", None, Some(&ctx)).unwrap();
@@ -62,6 +67,7 @@ fn main() {
 #[macro_export]
 macro_rules! py_exception {
     ($module: ident, $name: ident, $base: ty) => {
+
         pub struct $name($crate::PyObject);
 
         pyobject_newtype!($name);
@@ -458,5 +464,3 @@ mod tests {
         drop(PyErr::fetch(py));
     }
 }
-
-
