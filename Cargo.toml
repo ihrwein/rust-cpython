@@ -41,7 +41,7 @@ path = "python3-sys"
 version = "0.1.2"
 
 [features]
-default = ["python3-sys"]
+default = ["python27-sys"]
 
 # Enable additional features that require nightly rust
 nightly = []
