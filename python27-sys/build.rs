@@ -179,12 +179,15 @@ fn run_python_script(interpreter: &str, script: &str) -> Result<String, String> 
 
 #[cfg(not(target_os="macos"))]
 #[cfg(not(target_os="windows"))]
-fn get_rustc_link_lib(version: &PythonVersion, enable_shared: bool) -> Result<String, String> {
+fn get_rustc_link_lib(version: &PythonVersion, enable_shared: bool) -> Result<Vec<String>, String> {
     let dotted_version = format!("{}.{}", version.major, version.minor.unwrap());
     if enable_shared {
-        Ok(format!("cargo:rustc-link-lib=python{}", dotted_version))
+        Ok(vec![format!("cargo:rustc-link-lib=python{}", dotted_version)])
     } else {
-        Ok(format!("cargo:rustc-link-lib=static=python{}", dotted_version))
+        Ok(vec![
+            format!("cargo:rustc-link-lib=static=python{}-pic", dotted_version),
+            format!("cargo:rustc-link-search=native=/usr/lib/python2.7/config-x86_64-linux-gnu/")
+        ])
     }
 }
 
@@ -297,8 +300,9 @@ fn configure_from_path(expected_version: &PythonVersion) -> Result<String, Strin
     let enable_shared: &str = &lines[2];
     let exec_prefix: &str = &lines[3];
 
-    println!("{}", get_rustc_link_lib(&interpreter_version,
-        enable_shared == "1").unwrap());
+    for cfg in get_rustc_link_lib(&interpreter_version, false).unwrap() {
+        println!("{}", cfg);
+    }
 
     if libpath != "None" {
         println!("cargo:rustc-link-search=native={}", libpath);
